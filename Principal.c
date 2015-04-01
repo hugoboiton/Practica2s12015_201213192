@@ -1,0 +1,488 @@
+
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <time.h> 
+
+#define TRUE 1
+#define FALSE 0
+
+enum {IZQUIERDO, DERECHO};
+
+/* Estructuras y tipos */
+typedef struct _nodo {
+   int dato;
+   int FE;
+   struct _nodo *derecho;
+   struct _nodo *izquierdo;
+   struct _nodo *padre;
+} tipoNodo;
+
+typedef tipoNodo *pNodo;
+typedef tipoNodo *Arbol;
+
+typedef struct _nodolista {
+   int valor;
+   struct _nodolista *siguiente;
+   struct _nodolista *anterior;
+} tipoNodolista;
+typedef tipoNodolista *pNodol;
+typedef tipoNodolista *Lista;
+/*metodos del arbol vl*/
+void Insertar(Arbol *a, int dat);
+int Vacio(Arbol r);
+int EsHoja(pNodo r);
+int NumeroNodos(Arbol a, int* c);
+int AlturaArbol(Arbol a, int* altura);
+int Altura(Arbol a, int dat);
+void InOrden(Arbol, void (*func)(int*));
+void Equilibrar(Arbol *raiz, pNodo nodo, int, int);
+void RSI(Arbol *raiz, pNodo nodo);
+void RSD(Arbol *raiz, pNodo nodo);
+void RDI(Arbol *raiz, pNodo nodo);
+void RDD(Arbol *raiz, pNodo nodo);
+void auxContador(Arbol a, int*);
+void auxAltura(Arbol a, int, int*);
+void Mostrar(int *d);
+void leer1(Arbol *A);
+void enOrden(Arbol);
+/*metodos de la lista*/
+void Insertarlista(Lista *l, int v);
+void MostrarLista(Lista l);
+void OrdenarBurbuja(Lista l);
+int main(int argc, char *argv[])
+{
+   Arbol ArbolInt=NULL;
+   Lista lista = NULL;
+   clock_t start = clock();  
+   leer1(&ArbolInt); 
+   printf(" insercion arbol %f", ((double)clock() - start) / CLOCKS_PER_SEC);  
+   printf("\n");
+   clock_t start2 = clock();  
+   printf("En Orden: \n");
+   //InOrden(ArbolInt, Mostrar);
+   enOrden(ArbolInt);
+   printf("\n");
+   printf(" recorido del arbol %f", ((double)clock() - start2) / CLOCKS_PER_SEC); 
+   printf("\n");
+   printf("---------------\n");
+   clock_t start3 = clock();  
+   leer2(&lista); 
+   printf(" insercion lista %f", ((double)clock() - start3) / CLOCKS_PER_SEC);  
+   printf("\n");
+   clock_t start4 = clock();  
+    OrdenarBurbuja(lista);
+    //printf("\n");
+   printf(" recorido de burbuja %f", ((double)clock() - start4) / CLOCKS_PER_SEC); 
+   printf("\n");
+   MostrarLista(lista);
+
+   return 0;
+}
+void leer1(Arbol *A){
+     
+         FILE *archivo;
+	  char caracteres[100];
+          int val;
+          archivo = fopen("prueba.txt","r");
+       	if (archivo == NULL){
+
+		printf("\nError de apertura del archivo. \n\n");
+                
+        }else{
+
+
+	    
+            
+	    while (feof(archivo) == 0)
+	    {
+		
+                fgets(caracteres,100,archivo);
+ 		
+                val = atoi(caracteres);
+                
+                if (val != 0){
+                Insertar(A,val); 
+                }
+                
+	    }
+        }
+        fclose(archivo);
+         
+}
+void leer2 (Lista *l){
+    FILE *archivo;
+	  char caracteres[100];
+          int val;
+          archivo = fopen("prueba.txt","r");
+       	if (archivo == NULL){
+
+		printf("\nError de apertura del archivo. \n\n");
+                
+        }else{
+
+
+	   
+            
+	    while (feof(archivo) == 0)
+	    {
+		
+                fgets(caracteres,100,archivo);
+ 		
+                val = atoi(caracteres);
+                
+                if (val != 0){
+                Insertarlista(l,val); 
+                }
+                
+	    }
+        }
+        fclose(archivo);
+
+}
+void Insertar(Arbol *a, int dat)
+{
+   pNodo padre = NULL;
+   pNodo actual = *a;
+
+   
+   while(!Vacio(actual) && dat != actual->dato) {
+      padre = actual;
+      if(dat < actual->dato) actual = actual->izquierdo;
+      else if(dat > actual->dato) actual = actual->derecho;
+   }
+
+   
+   if(!Vacio(actual)) return;
+   
+   if(Vacio(padre)) {
+      *a = (Arbol)malloc(sizeof(tipoNodo));
+      (*a)->dato = dat;
+      (*a)->izquierdo = (*a)->derecho = NULL;
+      (*a)->padre = NULL;
+      (*a)->FE = 0;
+   }
+   
+   else if(dat < padre->dato) {
+      actual = (Arbol)malloc(sizeof(tipoNodo));
+      padre->izquierdo = actual;
+      actual->dato = dat;
+      actual->izquierdo = actual->derecho = NULL;
+      actual->padre = padre;
+      actual->FE = 0;
+      Equilibrar(a, padre, IZQUIERDO, TRUE);
+   }
+  
+   else if(dat > padre->dato) {
+      actual = (Arbol)malloc(sizeof(tipoNodo));
+      padre->derecho = actual;
+      actual->dato = dat;
+      actual->izquierdo = actual->derecho = NULL;
+      actual->padre = padre;
+      actual->FE = 0;
+      Equilibrar(a, padre, DERECHO, TRUE);
+  }
+}
+
+
+void Equilibrar(Arbol *a, pNodo nodo, int rama, int nuevo)
+{
+   int salir = FALSE;
+
+   
+   while(nodo && !salir) {
+      if(nuevo)
+         if(rama == IZQUIERDO) nodo->FE--; 
+         else                  nodo->FE++;
+      else
+         if(rama == IZQUIERDO) nodo->FE++; 
+         else                  nodo->FE--;
+      if(nodo->FE == 0) salir = TRUE; 
+      else if(nodo->FE == -2) { 
+         if(nodo->izquierdo->FE == 1) RDD(a, nodo); 
+         else RSD(a, nodo);                         
+         salir = TRUE;
+      }
+      else if(nodo->FE == 2) {  
+         if(nodo->derecho->FE == -1) RDI(a, nodo); 
+         else RSI(a, nodo);                        
+         salir = TRUE;
+      }
+      if(nodo->padre)
+         if(nodo->padre->derecho == nodo) rama = DERECHO; else rama = IZQUIERDO;
+      nodo = nodo->padre; 
+   }
+}
+
+
+void RDD(Arbol *raiz, Arbol nodo)
+{
+   pNodo Padre = nodo->padre;
+   pNodo P = nodo;
+   pNodo Q = P->izquierdo;
+   pNodo R = Q->derecho;
+   pNodo B = R->izquierdo;
+   pNodo C = R->derecho;
+
+   if(Padre)
+     if(Padre->derecho == nodo) Padre->derecho = R;
+     else Padre->izquierdo = R;
+   else *raiz = R;
+
+   
+   Q->derecho = B;
+   P->izquierdo = C;
+   R->izquierdo = Q;
+   R->derecho = P;
+
+  
+   R->padre = Padre;
+   P->padre = Q->padre = R;
+   if(B) B->padre = Q;
+   if(C) C->padre = P;
+
+   
+   switch(R->FE) {
+      case -1: Q->FE = 0; P->FE = 1; break;
+      case 0:  Q->FE = 0; P->FE = 0; break;
+      case 1:  Q->FE = -1; P->FE = 0; break;
+   }
+   R->FE = 0;
+}
+
+
+void RDI(Arbol *a, pNodo nodo)
+{
+   pNodo Padre = nodo->padre;
+   pNodo P = nodo;
+   pNodo Q = P->derecho;
+   pNodo R = Q->izquierdo;
+   pNodo B = R->izquierdo;
+   pNodo C = R->derecho;
+
+   if(Padre)
+     if(Padre->derecho == nodo) Padre->derecho = R;
+     else Padre->izquierdo = R;
+   else *a = R;
+
+   
+   P->derecho = B;
+   Q->izquierdo = C;
+   R->izquierdo = P;
+   R->derecho = Q;
+
+   
+   R->padre = Padre;
+   P->padre = Q->padre = R;
+   if(B) B->padre = P;
+   if(C) C->padre = Q;
+
+   
+   switch(R->FE) {
+      case -1: P->FE = 0; Q->FE = 1; break;
+      case 0:  P->FE = 0; Q->FE = 0; break;
+      case 1:  P->FE = -1; Q->FE = 0; break;
+   }
+   R->FE = 0;
+}
+
+
+void RSD(Arbol *a, pNodo nodo)
+{
+   pNodo Padre = nodo->padre;
+   pNodo P = nodo;
+   pNodo Q = P->izquierdo;
+   pNodo B = Q->derecho;
+
+   if(Padre)
+     if(Padre->derecho == P) Padre->derecho = Q;
+     else Padre->izquierdo = Q;
+   else *a = Q;
+
+   
+   P->izquierdo = B;
+   Q->derecho = P;
+
+   
+   P->padre = Q;
+   if(B) B->padre = P;
+   Q->padre = Padre;
+
+   
+   P->FE = 0;
+   Q->FE = 0;
+}
+
+
+void RSI(Arbol *a, pNodo nodo)
+{
+   pNodo Padre = nodo->padre;
+   pNodo P = nodo;
+   pNodo Q = P->derecho;
+   pNodo B = Q->izquierdo;
+
+   if(Padre)
+     if(Padre->derecho == P) Padre->derecho = Q;
+     else Padre->izquierdo = Q;
+   else *a = Q;
+
+   
+   P->derecho = B;
+   Q->izquierdo = P;
+
+   
+   P->padre = Q;
+   if(B) B->padre = P;
+   Q->padre = Padre;
+
+   
+   P->FE = 0;
+   Q->FE = 0;
+}
+
+
+
+void InOrden(Arbol a, void (*func)(int*))
+{
+   if(a->izquierdo) InOrden(a->izquierdo, func);
+   func(&(a->dato));
+   if(a->derecho) InOrden(a->derecho, func);
+}
+int Altura(Arbol a, int dat)
+{
+   int altura = 0;
+   pNodo actual = a;
+
+   
+   while(!Vacio(actual)) {
+      if(dat == actual->dato) return altura; 
+      else {
+         altura++; 
+         if(dat < actual->dato) actual = actual->izquierdo;
+         else if(dat > actual->dato) actual = actual->derecho;
+      }
+   }
+   return -1; 
+}
+
+
+int NumeroNodos(Arbol a, int *contador)
+{
+   *contador = 0;
+
+   auxContador(a, contador); 
+   return *contador;
+}
+void auxContador(Arbol nodo, int *c)
+{
+   (*c)++; 
+ 
+   if(nodo->izquierdo) auxContador(nodo->izquierdo, c);
+   if(nodo->derecho)   auxContador(nodo->derecho, c);
+}
+int AlturaArbol(Arbol a, int *altura)
+{
+   *altura = 0;
+
+   auxAltura(a, 0, altura); 
+   return *altura;
+}
+void auxAltura(pNodo nodo, int a, int *altura)
+{
+   
+   if(nodo->izquierdo) auxAltura(nodo->izquierdo, a+1, altura);
+   if(nodo->derecho)   auxAltura(nodo->derecho, a+1, altura);
+   
+   if(EsHoja(nodo) && a > *altura) *altura = a;
+}
+int Vacio(Arbol r)
+{
+   return r==NULL;
+}
+int EsHoja(pNodo r)
+{
+   return !r->derecho && !r->izquierdo;
+}
+void Mostrar(int *d)
+{
+   printf("%d, ", *d);
+}
+void enOrden(Arbol a)
+{
+   if(a->izquierdo) enOrden(a->izquierdo);
+   printf("%d ",a->dato);
+   if(a->derecho) enOrden(a->derecho);
+}
+
+void Insertarlista(Lista *lista, int v)
+{
+   pNodol nuevo, actual;
+
+  
+   nuevo = (pNodol)malloc(sizeof(tipoNodolista));
+   nuevo->valor = v;
+   
+   
+   actual = *lista;
+   if(actual) while(actual->anterior) actual = actual->anterior;
+   
+   if(!actual || actual->valor > v) {
+      
+      nuevo->siguiente = actual; 
+      nuevo->anterior = NULL;
+      if(actual) actual->anterior = nuevo;
+      if(!*lista) *lista = nuevo;
+   }
+   else {
+      
+      while(actual->siguiente && actual->siguiente->valor <= v) 
+         actual = actual->siguiente;
+      
+      nuevo->siguiente = actual->siguiente;
+      actual->siguiente = nuevo;
+      nuevo->anterior = actual;
+      if(nuevo->siguiente) nuevo->siguiente->anterior = nuevo;
+      
+   }
+   
+   //tamano=tamano+1;
+}
+void MostrarLista(Lista lista)
+{
+   pNodol nodo = lista;
+
+   if(!lista) printf("Lista vacía");
+
+   nodo = lista;
+   
+      while(nodo->anterior) nodo = nodo->anterior;
+      printf("Orden : ");
+      while(nodo) {
+         printf("%d ,", nodo->valor);
+         nodo = nodo->siguiente;
+      }
+   
+}
+void OrdenarBurbuja(Lista lista){
+    pNodol nodo=lista;
+    pNodol nodo2;
+    int aux;
+    while (nodo != NULL){
+        aux=nodo->valor;
+        nodo2=nodo->siguiente;
+        while (nodo2 != NULL){
+            if(nodo->valor > nodo2->valor){
+                int temp;
+                temp=nodo->valor;
+                nodo->valor=nodo2->valor;
+                nodo2->valor=temp;
+            
+            }
+            nodo2=nodo2->siguiente;
+            
+        }
+        nodo=nodo->siguiente;
+    }
+
+}
