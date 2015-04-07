@@ -534,7 +534,6 @@ void  OrdenarSort(int v2[], int d){
 
 }
 void grafica (){
-
     register int i=0;
     
     FILE * archivoPuntos = fopen("puntosGraficar.txt", "w");
