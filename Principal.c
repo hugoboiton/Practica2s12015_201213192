@@ -534,32 +534,26 @@ void  OrdenarSort(int v2[], int d){
 
 }
 void grafica (){
-// X, Y valores de los puntos a graficar
-    //double valoresX[NUM_PUNTOS] = {0.0, 1.0, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0};
-    //double valoresY[NUM_PUNTOS] = {1,2,3,4,5,6,7,8,9,10,11};
+
     register int i=0;
-    /* se crea y se abre el archivo puntosGraficar.txt en modo escritura 
-     * para almacenar los valores de x y y que están declarados en los arreglos
-     * valoresX y valoresY*/
+    
     FILE * archivoPuntos = fopen("puntosGraficar.txt", "w");
 
-    /*Guardar los puntos x,y en el archivo de texto creado y abierto previamente*/
+    
     for (i=0;i<NUM_PUNTOS;i++){
        fprintf(archivoPuntos, "%lf %lf \n", valoresX[i], valoresY[i]);
  }
  
-    /*lista de comandos para ejecutar y configurar la visualización que tendrán
-     * los puntos en la gráfica con gnuplot*/
+    
     char * configGnuplot[] = {"set title \" Grafica   \"", 
                                 "set ylabel \"----Y--->\"",
                                 "set xlabel \"---- X--->\"",
                                 "plot \"puntosGraficar.txt\" using 1:2 with lines"
                                };
 
-    /*Se crea una archivo de tipo poen, es una tebería IPC que se usa, para
-     * ejecutar gnuplot y enviarle el archivo a graficar*/
+    
     FILE * ventanaGnuplot = popen ("gnuplot -persist", "w");
-    // Executing gnuplot commands one by one
+    
     for (i=0;i<NUM_COMANDOS;i++){
      fprintf(ventanaGnuplot, "%s \n", configGnuplot[i]);
  }
