@@ -7,10 +7,12 @@
 
 #define TRUE 1
 #define FALSE 0
+#define NUM_PUNTOS 3
+#define NUM_COMANDOS 4
 
 enum {IZQUIERDO, DERECHO};
 
-/* Estructuras y tipos */
+
 typedef struct _nodo {
    int dato;
    int FE;
@@ -50,34 +52,57 @@ void enOrden(Arbol);
 /*metodos de la lista*/
 void Insertarlista(Lista *l, int v);
 void MostrarLista(Lista l);
-void OrdenarBurbuja(Lista l);
+void OrdenarBurbuja(Lista *l);
+void ingresoVector(Lista l, int t);
+void OrdenarSort(int v [], int d);
+void MostrarVector(int v2 [], int largo);
+void grafica();
+int tamano;
+double valoresX[NUM_PUNTOS];
+double valoresY[NUM_PUNTOS];
 int main(int argc, char *argv[])
 {
    Arbol ArbolInt=NULL;
    Lista lista = NULL;
    clock_t start = clock();  
    leer1(&ArbolInt); 
-   printf(" insercion arbol %f", ((double)clock() - start) / CLOCKS_PER_SEC);  
+   double i= (double)clock() -start/CLOCKS_PER_SEC;
+   printf(" insercion arbol %f", i);
+   valoresY[0]=i;
    printf("\n");
    clock_t start2 = clock();  
-   printf("En Orden: \n");
+   printf("Mostrar el recorido en Orden: \n");
    //InOrden(ArbolInt, Mostrar);
    enOrden(ArbolInt);
+   double i2= (double)clock() -start2/CLOCKS_PER_SEC;
+   valoresX[0]=i2;
    printf("\n");
-   printf(" recorido del arbol %f", ((double)clock() - start2) / CLOCKS_PER_SEC); 
+   printf(" Tiempo del recorido del arbol %f", i2); 
+   
    printf("\n");
    printf("---------------\n");
    clock_t start3 = clock();  
-   leer2(&lista); 
-   printf(" insercion lista %f", ((double)clock() - start3) / CLOCKS_PER_SEC);  
+   leer2(&lista);
+   double i3= (double)clock() -start3/CLOCKS_PER_SEC;
+   printf(" Tiempo de insercion en lista %f",  i3);
+   valoresY[1]=i3;
+   valoresY[2]=i3;
    printf("\n");
    clock_t start4 = clock();  
-    OrdenarBurbuja(lista);
-    //printf("\n");
-   printf(" recorido de burbuja %f", ((double)clock() - start4) / CLOCKS_PER_SEC); 
+   ingresoVector(lista,tamano); 
+   double i4= (double)clock() -start4/CLOCKS_PER_SEC;
+   printf(" Tiempo de  Ordenamiento quicksort %f", i4); 
+   valoresX[1]=i4;
+   printf("\n");
+   clock_t start5 = clock();  
+   OrdenarBurbuja(&lista);
+   double i5= (double)clock() -start5/CLOCKS_PER_SEC;
+   printf(" Tiempo de  Ordenamiento Burbuja %f", i5); 
+   valoresX[2]=i5;
    printf("\n");
    MostrarLista(lista);
-
+   printf("\n");
+   grafica();
    return 0;
 }
 void leer1(Arbol *A){
@@ -184,8 +209,6 @@ void Insertar(Arbol *a, int dat)
       Equilibrar(a, padre, DERECHO, TRUE);
   }
 }
-
-
 void Equilibrar(Arbol *a, pNodo nodo, int rama, int nuevo)
 {
    int salir = FALSE;
@@ -214,8 +237,6 @@ void Equilibrar(Arbol *a, pNodo nodo, int rama, int nuevo)
       nodo = nodo->padre; 
    }
 }
-
-
 void RDD(Arbol *raiz, Arbol nodo)
 {
    pNodo Padre = nodo->padre;
@@ -250,8 +271,6 @@ void RDD(Arbol *raiz, Arbol nodo)
    }
    R->FE = 0;
 }
-
-
 void RDI(Arbol *a, pNodo nodo)
 {
    pNodo Padre = nodo->padre;
@@ -286,8 +305,6 @@ void RDI(Arbol *a, pNodo nodo)
    }
    R->FE = 0;
 }
-
-
 void RSD(Arbol *a, pNodo nodo)
 {
    pNodo Padre = nodo->padre;
@@ -313,8 +330,6 @@ void RSD(Arbol *a, pNodo nodo)
    P->FE = 0;
    Q->FE = 0;
 }
-
-
 void RSI(Arbol *a, pNodo nodo)
 {
    pNodo Padre = nodo->padre;
@@ -340,9 +355,6 @@ void RSI(Arbol *a, pNodo nodo)
    P->FE = 0;
    Q->FE = 0;
 }
-
-
-
 void InOrden(Arbol a, void (*func)(int*))
 {
    if(a->izquierdo) InOrden(a->izquierdo, func);
@@ -365,8 +377,6 @@ int Altura(Arbol a, int dat)
    }
    return -1; 
 }
-
-
 int NumeroNodos(Arbol a, int *contador)
 {
    *contador = 0;
@@ -414,7 +424,6 @@ void enOrden(Arbol a)
    printf("%d ",a->dato);
    if(a->derecho) enOrden(a->derecho);
 }
-
 void Insertarlista(Lista *lista, int v)
 {
    pNodol nuevo, actual;
@@ -427,47 +436,39 @@ void Insertarlista(Lista *lista, int v)
    actual = *lista;
    if(actual) while(actual->anterior) actual = actual->anterior;
    
-   if(!actual || actual->valor > v) {
+   if(!actual || actual->valor ) {
       
       nuevo->siguiente = actual; 
       nuevo->anterior = NULL;
       if(actual) actual->anterior = nuevo;
       if(!*lista) *lista = nuevo;
    }
-   else {
-      
-      while(actual->siguiente && actual->siguiente->valor <= v) 
-         actual = actual->siguiente;
-      
-      nuevo->siguiente = actual->siguiente;
-      actual->siguiente = nuevo;
-      nuevo->anterior = actual;
-      if(nuevo->siguiente) nuevo->siguiente->anterior = nuevo;
-      
-   }
    
-   //tamano=tamano+1;
+   
+   tamano=tamano+1;
 }
 void MostrarLista(Lista lista)
 {
    pNodol nodo = lista;
 
-   if(!lista) printf("Lista vacía");
+   if(!lista) {printf("Lista vacía");}
 
    nodo = lista;
    
       while(nodo->anterior) nodo = nodo->anterior;
-      printf("Orden : ");
+      printf("El orden Por Burbuja es: \n ");
       while(nodo) {
          printf("%d ,", nodo->valor);
          nodo = nodo->siguiente;
       }
    
 }
-void OrdenarBurbuja(Lista lista){
-    pNodol nodo=lista;
+void OrdenarBurbuja(Lista *lista){
+    pNodol nodo=*lista;
     pNodol nodo2;
     int aux;
+    
+    while (nodo->anterior) {nodo=nodo->anterior;}
     while (nodo != NULL){
         aux=nodo->valor;
         nodo2=nodo->siguiente;
@@ -483,6 +484,86 @@ void OrdenarBurbuja(Lista lista){
             
         }
         nodo=nodo->siguiente;
+      
     }
+    
+   
+}
+void ingresoVector(Lista lista , int t){
+    int vector [t];
+    int k=0;
+    int c =t;
+    pNodol nodo =lista;
+    while (nodo->anterior) {nodo=nodo->anterior;}
+    while (nodo){
+        vector[k]=nodo->valor;
+        k++;
+        nodo=nodo->siguiente;
+    }
+    
+    OrdenarSort(vector,c);
+    //MostrarVector(vector,c);
+    
+}
+void MostrarVector(int v[], int d){
+
+    printf("El orden por quicksort \n");
+    int i;
+    for (i=0; i < d; i++) {
+	printf("%d,", v[i]);  
+    }
+    printf("\n");	
+
+}
+void  OrdenarSort(int v2[], int d){
+    int insercion;
+    int siguiente;
+    
+    
+    for (siguiente=1; siguiente < d; siguiente++) {
+        insercion=v2[siguiente];
+        
+        int moverElemento =siguiente;
+        while (moverElemento >0 && v2[moverElemento-1]> insercion){
+            v2[moverElemento]= v2[moverElemento-1];
+            moverElemento--;
+        }
+        v2[moverElemento] =insercion;
+    }
+    MostrarVector(v2,d);
+
+}
+void grafica (){
+// X, Y valores de los puntos a graficar
+    //double valoresX[NUM_PUNTOS] = {0.0, 1.0, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0};
+    //double valoresY[NUM_PUNTOS] = {1,2,3,4,5,6,7,8,9,10,11};
+    register int i=0;
+    /* se crea y se abre el archivo puntosGraficar.txt en modo escritura 
+     * para almacenar los valores de x y y que están declarados en los arreglos
+     * valoresX y valoresY*/
+    FILE * archivoPuntos = fopen("puntosGraficar.txt", "w");
+
+    /*Guardar los puntos x,y en el archivo de texto creado y abierto previamente*/
+    for (i=0;i<NUM_PUNTOS;i++){
+       fprintf(archivoPuntos, "%lf %lf \n", valoresX[i], valoresY[i]);
+ }
+ 
+    /*lista de comandos para ejecutar y configurar la visualización que tendrán
+     * los puntos en la gráfica con gnuplot*/
+    char * configGnuplot[] = {"set title \" Grafica   \"", 
+                                "set ylabel \"----Y--->\"",
+                                "set xlabel \"---- X--->\"",
+                                "plot \"puntosGraficar.txt\" using 1:2 with lines"
+                               };
+
+    /*Se crea una archivo de tipo poen, es una tebería IPC que se usa, para
+     * ejecutar gnuplot y enviarle el archivo a graficar*/
+    FILE * ventanaGnuplot = popen ("gnuplot -persist", "w");
+    // Executing gnuplot commands one by one
+    for (i=0;i<NUM_COMANDOS;i++){
+     fprintf(ventanaGnuplot, "%s \n", configGnuplot[i]);
+ }
+ fclose(archivoPuntos);
+
 
 }
